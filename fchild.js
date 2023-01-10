@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
 import { encrypt } from './helper.js'
 
 try {
@@ -6,7 +6,8 @@ try {
     const { pubKey, file } = JSON.parse(message.toString())
     const content = readFileSync(file)
     const encryptData = encrypt(pubKey, content)
-    process.send(encryptData.toString('base64'))
+    writeFileSync('encrypted.txt', encryptData.toString('base64'))
+    process.send('./encrypted.txt')
   })
 } catch (err) {
   console.log(err)
