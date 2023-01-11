@@ -23,21 +23,31 @@ try {
   }
 
   child.on('message', (message) => {
-    const childFile = readFileSync(message)
-    const buf = Buffer.from(childFile.toString(), 'base64')
-    const decrypted = decrypt(privateKey, secret, buf)
-    const decryptedMessage = verify(algo, decrypted, publicKey, signature) ? decrypted.toString() : 'Invalid Message'
-    console.table([{
-      time: process.uptime(),
-      message: decryptedMessage,
-      memoryConsumed: (startMem - freemem()) / 1048576,
-    }])
-    process.exit(0)
+    try {
+      const childFile = readFileSync(message)
+      const buf = Buffer.from(childFile.toString(), 'base64')
+      const decrypted = decrypt(privateKey, secret, buf)
+      const decryptedMessage = verify(algo, decrypted, publicKey, signature) ? decrypted.toString() : 'Invalid Message'
+      console.table([{
+        time: process.uptime(),
+        message: decryptedMessage,
+        memoryConsumed: (startMem - freemem()) / 1048576,
+      }])
+      process.exit()
+    } catch (err) {
+      console.log(err)
+      process.exit(1)
+    }
   })
-  process.on('error', (error) => {
+  child.on('error', (error) => {
     console.log(error)
+    process.exit(1)
   })
   child.send(sendObj)
+  process.on('exit', () => {
+    child.kill()
+  })
 } catch (err) {
   console.log(err.message)
+  process.exit(1)
 }

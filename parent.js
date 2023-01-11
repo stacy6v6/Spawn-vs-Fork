@@ -23,22 +23,33 @@ try {
   }
 
   child.stdout.on('data', (data) => {
-    const childFile = readFileSync(data)
-    const buf = Buffer.from(childFile.toString(), 'base64')
-    const decrypted = decrypt(privateKey, secret, buf)
-    const decryptedMessage = verify(algo, decrypted, publicKey, signature) ? decrypted.toString() : 'Invalid Message'
-    console.table([{
-      time: process.uptime(),
-      message: decryptedMessage,
-      memoryConsumed: (startMem - freemem()) / 1048576,
-    }])
-    process.exit(0)
+    try {
+      const childFile = readFileSync(data)
+      const buf = Buffer.from(childFile.toString(), 'base64')
+      const decrypted = decrypt(privateKey, secret, buf)
+      const decryptedMessage = verify(algo, decrypted, publicKey, signature) ? decrypted.toString() : 'Invalid Message'
+      console.table([{
+        time: process.uptime(),
+        message: decryptedMessage,
+        memoryConsumed: (startMem - freemem()) / 1048576,
+      }])
+      process.exit()
+    } catch (err) {
+      console.log(err)
+      process.exit(1)
+    }
   })
 
   child.stderr.on('data', (err) => {
-    console.log(err.message)
+    console.log(err)
+    process.exit(1)
+  })
+  child.on('error', (err) => {
+    console.log(err)
+    process.exit(1)
   })
   child.stdin.write(JSON.stringify(sendObj))
 } catch (err) {
-  console.log(err.message)
+  console.log(err)
+  process.exit(1)
 }
