@@ -37,7 +37,7 @@ try {
   process.on('error', (error) => {
     console.log(error)
   })
-  child.send(JSON.stringify(sendObj))
+  child.send(sendObj)
 } catch (err) {
   console.log(err.message)
 }

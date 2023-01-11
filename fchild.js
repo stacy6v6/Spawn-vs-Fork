@@ -3,7 +3,7 @@ import { encrypt } from './helper.js'
 
 try {
   process.on('message', (message) => {
-    const { pubKey, file } = JSON.parse(message.toString())
+    const { pubKey, file } = message
     const content = readFileSync(file)
     const encryptData = encrypt(pubKey, content)
     writeFileSync('encrypted.txt', encryptData.toString('base64'))
